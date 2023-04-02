@@ -4,7 +4,7 @@ const socketIO = require('socket.io');
 const qrcode = require('qrcode');
 const http = require('http');
 const fs = require('fs');
-const { phoneNumberFormatter } = require('./helpers/formatter');
+const { phoneNumberFormatter, groupFormatter } = require('./helpers/formatter');
 const fileUpload = require('express-fileupload');
 const axios = require('axios');
 const { body, validationResult } = require('express-validator');
@@ -107,9 +107,17 @@ const createSession = function (id, description, webhook) {
   });
 
   client.on('message', msg => {
-    io.emit('message', { id: id, text: 'Message ' + msg.type + ' from ' + msg.from + ' body ' + msg.body });
     if (!msg.isStatus) {
-      if (["chat", "list_response", "buttons_response"].includes(msg.type)) {
+      io.emit('message', { id: id, text: 'Message ' + msg.type + ' from ' + msg.from + ' body ' + msg.body });
+      if (["chat", "image", "video", "list_response", "buttons_response"].includes(msg.type)) {
+        if (msg.from.endsWith('@c.us')) {
+          console.log(id + ' contact', msg.from);
+          var isGroup = 0;
+        }
+        if (msg.from.endsWith('@g.us')) {
+          console.log(id + ' group', msg.from);
+          var isGroup = 1;
+        }
         // get webhook from json
         const savedSessions = getSessionsFile();
         const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
@@ -122,6 +130,7 @@ const createSession = function (id, description, webhook) {
             data: {
               chatid: msg.id,
               number: msg.from,
+              isGroup: isGroup,
               message: msg.body,
               timestamp: msg.timestamp,
             }
@@ -132,7 +141,7 @@ const createSession = function (id, description, webhook) {
             });
         }
       } else {
-        console.log(msg.type);
+        console.log(msg.type + ' from ' + msg.from + ' isStatus ' + msg.isStatus);
       }
     }
   });
@@ -167,7 +176,7 @@ const createSession = function (id, description, webhook) {
     savedSessions.push({
       id: id,
       description: description,
-      webhook: 'www.google.com',
+      webhook: '',
       ready: false,
     });
     setSessionsFile(savedSessions);
@@ -277,7 +286,7 @@ app.post('/send-group', [
   }
   // get request
   const username = req.body.username;
-  const group = req.body.group;
+  const group = groupFormatter(req.body.group);
   const message = req.body.message;
   // init client
   const client = sessions.find(sess => sess.id == username)?.client;
@@ -288,7 +297,7 @@ app.post('/send-group', [
     })
   }
   // send message group
-  client.sendMessage('120363044576251255@g.us', message).then(response => {
+  client.sendMessage(group, message).then(response => {
     io.emit('message', { id: username, text: 'Send Message to ' + group });
     return res.status(200).send({
       status: true,
@@ -411,5 +420,3 @@ app.post('/send-filepath', [
     });
   });
 });
-
-
