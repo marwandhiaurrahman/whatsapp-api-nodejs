@@ -274,7 +274,7 @@ app.post('/send-message', [
   });
 });
 // send group
-app.post('/send-group', [
+app.post('/send-message-group', [
   body('group').notEmpty(),
   body('username').notEmpty(),
   body('message').notEmpty(),
