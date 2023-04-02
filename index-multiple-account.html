@@ -101,6 +101,9 @@
 			<div class="client hide">
 				<h3 class="title"></h3>
 				<p class="description"></p>
+				<a href="#" class="urlwebhook" target="_blank">
+					<p class="webhook"></p>
+				</a>
 				<img src="" alt="QR Code" id="qrcode">
 				<h3>Logs:</h3>
 				<ul class="logs"></ul>
@@ -143,6 +146,7 @@
 
 					var clientId = session.id;
 					var clientDescription = session.description;
+					var clientWebhook = session.webhook;
 
 					var clientClass = 'client-' + clientId;
 					var template = $('.client').first().clone()
@@ -151,6 +155,9 @@
 
 					template.find('.title').html(clientId);
 					template.find('.description').html(clientDescription);
+					template.find('.webhook').html(clientWebhook);
+					template.find('.urlwebhook').attr("href", clientWebhook);
+
 					$('.client-container').append(template);
 
 					if (session.ready) {
