@@ -106,16 +106,18 @@ const createSession = function (id, description, webhook) {
     io.emit('message', { id: id, text: 'Auth failure, restarting...' });
   });
 
-  client.on('message', msg => {
-    if (!msg.isStatus) {
+  client.on('message', async msg => {
+    if (msg.from.endsWith('@c.us') || msg.from.endsWith('@g.us')) {
       io.emit('message', { id: id, text: 'Message ' + msg.type + ' from ' + msg.from + ' body ' + msg.body });
       if (["chat", "image", "video", "list_response", "buttons_response"].includes(msg.type)) {
+        const contact = await msg.getContact();
+        const name = contact.pushname
         if (msg.from.endsWith('@c.us')) {
-          console.log(id + ' contact', msg.from);
+          console.log(id + ' contact', msg.isStatus);
           var isGroup = 0;
         }
         if (msg.from.endsWith('@g.us')) {
-          console.log(id + ' group', msg.from);
+          console.log(id + ' group', msg.isStatus);
           var isGroup = 1;
         }
         // get webhook from json
@@ -128,11 +130,13 @@ const createSession = function (id, description, webhook) {
             method: 'post',
             url: webhook,
             data: {
-              chatid: msg.id,
+              chatid: msg.id.id,
               number: msg.from,
-              isGroup: isGroup,
+              contact: name,
               message: msg.body,
+              isGroup: isGroup,
               timestamp: msg.timestamp,
+              username: id,
             }
           })
             .catch(async error => {
@@ -141,7 +145,7 @@ const createSession = function (id, description, webhook) {
             });
         }
       } else {
-        console.log(msg.type + ' from ' + msg.from + ' isStatus ' + msg.isStatus);
+        console.log(msg.type + ' from ' + msg.from );
       }
     }
   });
