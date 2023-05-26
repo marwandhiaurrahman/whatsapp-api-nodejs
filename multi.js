@@ -1,4 +1,4 @@
-const { Client, MessageMedia, LocalAuth } = require('whatsapp-web.js');
+const { Client, MessageMedia, LocalAuth, Buttons, List } = require('whatsapp-web.js');
 const express = require('express');
 const socketIO = require('socket.io');
 const qrcode = require('qrcode');
@@ -68,14 +68,11 @@ const createSession = function (id, description, webhook) {
       clientId: id
     })
   });
-
   client.initialize();
-
   client.on('loading_screen', (percent, message) => {
     console.log(id + ' LOADING SCREEN', percent, message);
     io.emit('message', { id: id, text: 'Load chat ' + percent + '% ' + message });
   });
-
   client.on('qr', (qr) => {
     // console.log(id + ' QR RECEIVED', qr);
     qrcode.toDataURL(qr, (err, url) => {
@@ -83,40 +80,33 @@ const createSession = function (id, description, webhook) {
       io.emit('message', { id: id, text: 'QR Code received, scan please!' });
     });
   });
-
   client.on('ready', () => {
     console.log(id + ' READY');
     io.emit('ready', { id: id });
     io.emit('message', { id: id, text: 'Whatsapp is ready!' });
-
     const savedSessions = getSessionsFile();
     const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
     savedSessions[sessionIndex].ready = true;
     setSessionsFile(savedSessions);
   });
-
   client.on('authenticated', () => {
     console.log(id + ' AUTHENTICATED');
     io.emit('authenticated', { id: id });
     io.emit('message', { id: id, text: 'Whatsapp is authenticated!' });
   });
-
   client.on('auth_failure', function () {
     io.emit('message', { id: id, text: 'Auth failure, restarting...' });
   });
-
   client.on('message', async msg => {
     if (msg.from.endsWith('@c.us') || msg.from.endsWith('@g.us')) {
       io.emit('message', { id: id, text: 'Message ' + msg.type + ' from ' + msg.from + ' body ' + msg.body });
       if (["chat", "image", "video", "list_response", "buttons_response"].includes(msg.type)) {
         const contact = await msg.getContact();
-        const name = contact.pushname
+        const name = contact.pushname;
         if (msg.from.endsWith('@c.us')) {
-          console.log(id + ' contact', msg.isStatus);
           var isGroup = 0;
         }
         if (msg.from.endsWith('@g.us')) {
-          console.log(id + ' group', msg.isStatus);
           var isGroup = 1;
         }
         // get webhook from json
@@ -138,17 +128,21 @@ const createSession = function (id, description, webhook) {
               username: id,
             }
           })
+            .then(async res => {
+              console.log(id + " SEND WEBHOOOK to " + msg.from);
+              io.emit('message', { id: id, text: 'SEND WEBHOOK' });
+
+            })
             .catch(async error => {
               console.log('WEBHOOK ERROR : ' + error + 'body : ' + msg.body);
               io.emit('message', { id: id, text: 'WEBHOOK ERROR : ' + error + 'body : ' + msg.body });
             });
         }
       } else {
-        console.log(msg.type + ' from ' + msg.from );
+        console.log(msg.type + ' from ' + msg.from);
       }
     }
   });
-
   // Change to false if you don't want to reject incoming calls
   let rejectCalls = true;
   client.on('call', async (call) => {
@@ -156,7 +150,6 @@ const createSession = function (id, description, webhook) {
     if (rejectCalls) await call.reject();
     await client.sendMessage(call.from, `[${call.fromMe ? 'Outgoing' : 'Incoming'}] Phone call from ${call.from}, type ${call.isGroup ? 'group' : ''} ${call.isVideo ? 'video' : 'audio'} call. ${rejectCalls ? 'Nomor ini tidak menerima panggilan. Panggilan ini otomatis ditutup oleh sistem.' : ''}`);
   });
-
   client.on('disconnected', (reason) => {
     console.log(id + ' DISCONNECTED ' + reason);
     io.emit('message', { id: id, text: 'Whatsapp is disconnected!' });
@@ -171,18 +164,15 @@ const createSession = function (id, description, webhook) {
 
     io.emit('remove-session', id);
   });
-
   // Tambahkan client ke sessions
   sessions.push({
     id: id,
     description: description,
     client: client
   });
-
   // Menambahkan session ke file
   const savedSessions = getSessionsFile();
   const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
-
   if (sessionIndex == -1) {
     savedSessions.push({
       id: id,
@@ -193,10 +183,8 @@ const createSession = function (id, description, webhook) {
     setSessionsFile(savedSessions);
   }
 }
-
 const init = function (socket) {
   const savedSessions = getSessionsFile();
-
   if (savedSessions.length > 0) {
     if (socket) {
       /**
@@ -219,9 +207,8 @@ const init = function (socket) {
   }
 }
 
-init();
-
 // Socket IO
+init();
 io.on('connection', function (socket) {
   init(socket);
 
@@ -246,15 +233,15 @@ app.post('/test', [
   const message = req.body.message;
   // // send message
   client.sendMessage("120363044576251255@g.us", message)
-      .then(
-          (response) => {
-              return res.send(response);
-          }
-      ).catch(
-          (error) => {
-              return res.send("Error : " + error);
-          }
-      );
+    .then(
+      (response) => {
+        return res.send(response);
+      }
+    ).catch(
+      (error) => {
+        return res.send("Error : " + error);
+      }
+    );
 });
 // send notif group
 app.post('/notif', [
@@ -263,15 +250,15 @@ app.post('/notif', [
   const message = req.body.message;
   // // send message
   client.sendMessage("120363044576251255@g.us", message)
-      .then(
-          (response) => {
-              return res.send(response);
-          }
-      ).catch(
-          (error) => {
-              return res.send("Error : " + error);
-          }
-      );
+    .then(
+      (response) => {
+        return res.send(response);
+      }
+    ).catch(
+      (error) => {
+        return res.send("Error : " + error);
+      }
+    );
 });
 // send message
 app.post('/send-message', [
@@ -304,7 +291,7 @@ app.post('/send-message', [
       message: 'The number is not registered'
     });
   }
-  // send messagef
+  // send message
   client.sendMessage(number, message).then(response => {
     io.emit('message', { id: username, text: 'Send Message to ' + number });
     return res.status(200).send({
@@ -361,91 +348,129 @@ app.post('/send-list', [
   body('contenttext').notEmpty(),
   body('buttontext').notEmpty(),
   body('rowtitle').notEmpty(),
+  body('username').notEmpty(),
 ], async (req, res) => {
   // checking error
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.mapped() });
+    return res.status(400).json({ errors: errors.mapped() });
   }
-  // init client
+  // get request
+  const username = req.body.username;
   const number = phoneNumberFormatter(req.body.number);
   let rowtitles = req.body.rowtitle;
-  // init list
+  // get list
   let rows = [];
   let i = 1;
-  // row title belakang koma
+  // get ow title belakang koma
   if (rowtitles.slice(-1) == ",") {
-      rowtitles = rowtitles.slice(0, -1)
+    rowtitles = rowtitles.slice(0, -1)
   }
-  // row desc null
+  // get row desc null
   if (req.body.rowdescription == null) {
-      rowdescription = '';
+    rowdescription = '';
   } else {
-      rowdescription = req.body.rowdescription.split(',');
+    rowdescription = req.body.rowdescription.split(',');
   }
   rowtitles.split(',').forEach(element => {
-      let description = rowdescription[i - 1] || '';
-      let rowid = {
-          title: element,
-          description: description,
-          id: 'rowid' + i++,
-      };
-      rows.push(rowid);
+    let description = rowdescription[i - 1] || '';
+    let rowid = {
+      title: element,
+      description: description,
+      id: 'rowid' + i++,
+    };
+    rows.push(rowid);
   });
   const section = {
-      title: req.body.titlesection,
-      rows: rows,
+    title: req.body.titlesection,
+    rows: rows,
   };
   const list = new List(req.body.contenttext, req.body.buttontext, [section], req.body.titletext, req.body.footertext)
+  // init client
+  const client = sessions.find(sess => sess.id == username)?.client;
+  if (!client) {
+    return res.status(422).send({
+      status: false,
+      message: `username : ${username} is not found!`
+    })
+  }
+  // check register number
+  const isRegisteredNumber = await client.isRegisteredUser(number);
+  if (!isRegisteredNumber) {
+    return res.status(422).send({
+      status: false,
+      message: 'The number is not registered'
+    });
+  }
+  // send list
   await client.sendMessage(number, list)
-      .then(
-          (response) => {
-              console.log('SEND LIST');
-              return res.send(response);
-          }
-      ).catch(
-          (error) => {
-              console.log("Error : " + error);
-              return res.send("Error : " + error);
-          }
-      );
+    .then(
+      (response) => {
+        console.log('SEND LIST');
+        return res.send(response);
+      }
+    ).catch(
+      (error) => {
+        console.log("Error : " + error);
+        return res.send("Error : " + error);
+      }
+    );
 });
 // send button
 app.post('/send-button', [
   body('number').notEmpty(),
   body('contenttext').notEmpty(),
   body('buttontext').notEmpty(),
+  body('username').notEmpty(),
 ], async (req, res) => {
   // checking error
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.mapped() });
+    return res.status(400).json({ errors: errors.mapped() });
   }
-  // init client
+  // get request
+  const username = req.body.username;
   const number = phoneNumberFormatter(req.body.number);
-  // button button
+  // gets button
   let buttons = [];
   let i = 1;
   req.body.buttontext.split(',').forEach(element => {
-      let buttonid = {
-          body: element,
-          id: 'buttonid' + i++,
-      };
-      buttons.push(buttonid);
+    let buttonid = {
+      body: element,
+      id: 'buttonid' + i++,
+    };
+    buttons.push(buttonid);
   });
   const buttons_reply = new Buttons(req.body.contenttext, buttons, req.body.titletext, req.body.footertext);
+  // init client
+  const client = sessions.find(sess => sess.id == username)?.client;
+  if (!client) {
+    return res.status(422).send({
+      status: false,
+      message: `username : ${username} is not found!`
+    })
+  }
+  // check register number
+  const isRegisteredNumber = await client.isRegisteredUser(number);
+  if (!isRegisteredNumber) {
+    return res.status(422).send({
+      status: false,
+      message: 'The number is not registered'
+    });
+  }
+  // send button
   await client.sendMessage(number, buttons_reply)
-      .then(
-          (response) => {
-              console.log('SEND BUTTON');
-              return res.send(response);
-          }
-      ).catch(
-          (error) => {
-              console.log("Error : " + error);
-              return res.send("Error : " + error);
-          }
-      );
+    .then(
+      (response) => {
+        console.log('SEND BUTTON');
+        return res.send(response);
+      }
+    ).catch(
+      (error) => {
+        console.log("Error : " + error);
+        return res.send("Error : " + error);
+      }
+    );
 });
 // send media
 app.post('/send-media', [
