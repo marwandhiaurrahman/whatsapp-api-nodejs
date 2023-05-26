@@ -232,6 +232,7 @@ app.post('/test', [
 ], async (req, res) => {
   const message = req.body.message;
   // // send message
+  const username = req.body.username;
   const client = sessions.find(sess => sess.id == username)?.client;
   client.sendMessage("120363044576251255@g.us", message)
     .then(
@@ -250,6 +251,7 @@ app.post('/notif', [
 ], async (req, res) => {
   const message = req.body.message;
   // // send message
+  const username = req.body.username;
   const client = sessions.find(sess => sess.id == username)?.client;
   client.sendMessage("120363044576251255@g.us", message)
     .then(
