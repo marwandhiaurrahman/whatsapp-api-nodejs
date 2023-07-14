@@ -288,13 +288,13 @@ app.post('/send-message', [
     })
   }
   // check register number
-  const isRegisteredNumber = await client.isRegisteredUser(number);
-  if (!isRegisteredNumber) {
-    return res.status(422).send({
-      status: false,
-      message: 'The number is not registered'
-    });
-  }
+  // const isRegisteredNumber = await client.isRegisteredUser(number);
+  // if (!isRegisteredNumber) {
+  //   return res.status(422).send({
+  //     status: false,
+  //     message: 'The number is not registered'
+  //   });
+  // }
   // send message
   client.sendMessage(number, message).then(response => {
     io.emit('message', { id: username, text: 'Send Message to ' + number });
@@ -399,13 +399,13 @@ app.post('/send-list', [
     })
   }
   // check register number
-  const isRegisteredNumber = await client.isRegisteredUser(number);
-  if (!isRegisteredNumber) {
-    return res.status(422).send({
-      status: false,
-      message: 'The number is not registered'
-    });
-  }
+  // const isRegisteredNumber = await client.isRegisteredUser(number);
+  // if (!isRegisteredNumber) {
+  //   return res.status(422).send({
+  //     status: false,
+  //     message: 'The number is not registered'
+  //   });
+  // }
   // send list
   await client.sendMessage(number, list)
     .then(
@@ -455,13 +455,13 @@ app.post('/send-button', [
     })
   }
   // check register number
-  const isRegisteredNumber = await client.isRegisteredUser(number);
-  if (!isRegisteredNumber) {
-    return res.status(422).send({
-      status: false,
-      message: 'The number is not registered'
-    });
-  }
+  // const isRegisteredNumber = await client.isRegisteredUser(number);
+  // if (!isRegisteredNumber) {
+  //   return res.status(422).send({
+  //     status: false,
+  //     message: 'The number is not registered'
+  //   });
+  // }
   // send button
   await client.sendMessage(number, buttons_reply)
     .then(
@@ -502,13 +502,13 @@ app.post('/send-media', [
     })
   }
   // check register number
-  const isRegisteredNumber = await client.isRegisteredUser(number);
-  if (!isRegisteredNumber) {
-    return res.status(422).send({
-      status: false,
-      message: 'The number is not registered'
-    });
-  }
+  // const isRegisteredNumber = await client.isRegisteredUser(number);
+  // if (!isRegisteredNumber) {
+  //   return res.status(422).send({
+  //     status: false,
+  //     message: 'The number is not registered'
+  //   });
+  // }
   // get media from internet
   axios.get(fileurl).then(async axres => {
     const media = await MessageMedia.fromUrl(fileurl, {
@@ -563,13 +563,13 @@ app.post('/send-filepath', [
     })
   }
   // check register number
-  const isRegisteredNumber = await client.isRegisteredUser(number);
-  if (!isRegisteredNumber) {
-    return res.status(422).send({
-      status: false,
-      message: 'The number is not registered'
-    });
-  }
+  // const isRegisteredNumber = await client.isRegisteredUser(number);
+  // if (!isRegisteredNumber) {
+  //   return res.status(422).send({
+  //     status: false,
+  //     message: 'The number is not registered'
+  //   });
+  // }
   // get media file path
   const media = MessageMedia.fromFilePath(filepath);
   client.sendMessage(number, media, { caption: caption }).then(response => {
