@@ -99,8 +99,7 @@
 		</div>
 		<div class="client-container">
 			<div class="client hide">
-				<h3 class="title"></h3>
-				<p class="description"></p>
+				<h3 class="description"></h3>
 				<a href="#" class="urlwebhook" target="_blank">
 					<p class="webhook"></p>
 				</a>
@@ -127,7 +126,6 @@
 					.removeClass('hide')
 					.addClass(clientClass);
 
-				template.find('.title').html(clientId);
 				template.find('.description').html(clientDescription);
 				template.find('.logs').append($('<li>').text('Connecting...'));
 				$('.client-container').append(template);
@@ -153,7 +151,6 @@
 						.removeClass('hide')
 						.addClass(clientClass);
 
-					template.find('.title').html(clientId);
 					template.find('.description').html(clientDescription);
 					template.find('.webhook').html(clientWebhook);
 					template.find('.urlwebhook').attr("href", clientWebhook);

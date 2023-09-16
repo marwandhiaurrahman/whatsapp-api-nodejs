@@ -226,7 +226,7 @@ app.get('/', (req, res) => {
     root: __dirname
   });
 });
-app.get('/wawebjs', (req, res) => {
+app.get('/swajsweb', (req, res) => {
   res.sendFile('index-multiple-account.html', {
     root: __dirname
   });
