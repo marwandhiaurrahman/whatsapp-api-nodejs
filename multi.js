@@ -222,6 +222,11 @@ server.listen(port, function () {
 });
 // index
 app.get('/', (req, res) => {
+  res.sendFile('index-wa.html', {
+    root: __dirname
+  });
+});
+app.get('/wawebjs', (req, res) => {
   res.sendFile('index-multiple-account.html', {
     root: __dirname
   });
