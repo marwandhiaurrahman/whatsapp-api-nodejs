@@ -66,7 +66,8 @@ const createSession = function (id, description, webhook) {
     },
     authStrategy: new LocalAuth({
       clientId: id
-    })
+    }),
+    webVersionCache: { type: 'remote', remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html', }
   });
   client.initialize();
   client.on('loading_screen', (percent, message) => {
