@@ -47,6 +47,8 @@ const setSessionsFile = function (sessions) {
 const getSessionsFile = function () {
   return JSON.parse(fs.readFileSync(SESSIONS_FILE));
 }
+const wwebVersion = '2.2412.54';
+
 const createSession = function (id, description, webhook) {
   console.log('Creating session: ' + id);
   const client = new Client({
@@ -67,7 +69,10 @@ const createSession = function (id, description, webhook) {
     authStrategy: new LocalAuth({
       clientId: id
     }),
-    webVersionCache: { type: 'remote', remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html', }
+    webVersionCache: {
+      type: 'remote',
+      remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
+    },
   });
   client.initialize();
   client.on('loading_screen', (percent, message) => {
