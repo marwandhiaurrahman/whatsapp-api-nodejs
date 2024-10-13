@@ -82,6 +82,30 @@ const createSession = function (id, description, webhook) {
   client.on('qr', (qr) => {
     // console.log(id + ' QR RECEIVED', qr);
     qrcode.toDataURL(qr, (err, url) => {
+      // get webhook from json
+      const savedSessions = getSessionsFile();
+      const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
+      var webhook = savedSessions[sessionIndex].webhook;
+      if (webhook) {
+        // send weebhook
+        axios({
+          method: 'post',
+          url: webhook,
+          data: {
+            qr: qr,
+            message: "#qr",
+            type: 'qr',
+            status: 'Received New QR Login',
+            username: id,
+          }
+        })
+          .then(async res => {
+            console.log(id + " SEND QR ");
+          })
+          .catch(async error => {
+            console.log(id + ' WEBHOOK QR ERROR : ' + error);
+          });
+      }
       io.emit('qr', { id: id, src: url });
       io.emit('message', { id: id, text: 'QR Code received, scan please!' });
     });
@@ -131,6 +155,8 @@ const createSession = function (id, description, webhook) {
               message: msg.body,
               isGroup: isGroup,
               timestamp: msg.timestamp,
+              type: 'message',
+              status: 'Received Message',
               username: id,
             }
           })
@@ -149,7 +175,6 @@ const createSession = function (id, description, webhook) {
       }
     }
   });
-  // Change to false if you don't want to reject incoming calls
   let rejectCalls = true;
   client.on('call', async (call) => {
     console.log('Call received, rejecting. GOTO Line 261 to disable', call);
@@ -174,6 +199,7 @@ const createSession = function (id, description, webhook) {
   sessions.push({
     id: id,
     description: description,
+    webhook: webhook,
     client: client
   });
   // Menambahkan session ke file
@@ -183,7 +209,7 @@ const createSession = function (id, description, webhook) {
     savedSessions.push({
       id: id,
       description: description,
-      webhook: '',
+      webhook: webhook,
       ready: false,
     });
     setSessionsFile(savedSessions);
@@ -207,7 +233,7 @@ const init = function (socket) {
       socket.emit('init', savedSessions);
     } else {
       savedSessions.forEach(sess => {
-        createSession(sess.id, sess.description);
+        createSession(sess.id, sess.description, sess.webhook);
       });
     }
   }
@@ -220,7 +246,7 @@ io.on('connection', function (socket) {
 
   socket.on('create-session', function (data) {
     console.log('Create session: ' + data.id);
-    createSession(data.id, data.description);
+    createSession(data.id, data.description, data.webhook);
   });
 });
 server.listen(port, function () {
@@ -236,25 +262,6 @@ app.get('/swajsweb', (req, res) => {
   res.sendFile('index-multiple-account.html', {
     root: __dirname
   });
-});
-// send message
-app.post('/test', [
-  body('message').notEmpty(),
-], async (req, res) => {
-  const message = req.body.message;
-  // // send message
-  const username = req.body.username;
-  const client = sessions.find(sess => sess.id == username)?.client;
-  client.sendMessage("120363044576251255@g.us", message)
-    .then(
-      (response) => {
-        return res.send(response);
-      }
-    ).catch(
-      (error) => {
-        return res.send("Error : " + error);
-      }
-    );
 });
 // send notif group
 app.post('/notif', [
