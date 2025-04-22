@@ -118,6 +118,31 @@ const createSession = function (id, description, webhook) {
     const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
     savedSessions[sessionIndex].ready = true;
     setSessionsFile(savedSessions);
+    var webhook = savedSessions[sessionIndex].webhook;
+    if (webhook) {
+      // send weebhook
+      axios({
+        method: 'post',
+        url: webhook,
+        data: {
+          chatid: 'system',
+          number: 'system',
+          contact: 'system',
+          message: 'system',
+          isGroup: 0,
+          timestamp: new Date(),
+          type: 'message',
+          status: 'Status Ready',
+          username: id,
+        }
+      })
+        .then(async res => {
+          console.log(id + " READY WEBHOOK ");
+        })
+        .catch(async error => {
+          console.log(id + ' WEBHOOK READY ERROR : ' + error);
+        });
+    }
   });
   client.on('authenticated', () => {
     console.log(id + ' AUTHENTICATED');
