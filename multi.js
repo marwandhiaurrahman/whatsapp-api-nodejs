@@ -213,12 +213,11 @@ const createSession = function (id, description, webhook) {
     client.initialize();
 
     // Menghapus pada file sessions
-    const savedSessions = getSessionsFile();
-    const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
-    savedSessions.splice(sessionIndex, 1);
-    setSessionsFile(savedSessions);
-
-    io.emit('remove-session', id);
+    // const savedSessions = getSessionsFile();
+    // const sessionIndex = savedSessions.findIndex(sess => sess.id == id);
+    // savedSessions.splice(sessionIndex, 1);
+    // setSessionsFile(savedSessions);
+    // io.emit('remove-session', id);
   });
   // Tambahkan client ke sessions
   sessions.push({
