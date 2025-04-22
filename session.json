@@ -1,1 +1,20 @@
-[{"id":"rswld1","description":"RSUD Waled","webhook":"http://192.168.2.30/siramah/api/wa/webhooka","ready":true},{"id":"mrwlmc","description":"Marwan Test","webhook":"","ready":false}]
+[
+    {
+        "id": "rswld1",
+        "description": "RSUD Waled",
+        "webhook": "http://192.168.2.30/siramah/api/wa/webhooka",
+        "ready": true
+    },
+    {
+        "id": "mrwlmc",
+        "description": "Marwan Test",
+        "webhook": "",
+        "ready": false
+    },
+    {
+        "id": "testkuks",
+        "description": "Marwan Wa",
+        "webhook": "",
+        "ready": false
+    }
+]
