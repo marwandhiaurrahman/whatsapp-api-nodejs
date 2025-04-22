@@ -131,7 +131,7 @@ const createSession = function (id, description, webhook) {
           message: 'system',
           isGroup: 0,
           timestamp: new Date(),
-          type: 'message',
+          type: 'info',
           status: 'Status Ready',
           username: id,
         }
