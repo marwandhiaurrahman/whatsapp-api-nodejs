@@ -1,1 +1,1 @@
-[{"id":"rswld1","description":"RSUD Waled","webhook":"http://192.168.2.30/siramah/api/wa/webhooka","ready":true},{"id":"mrwlmc","description":"Marwan Test","webhook":"","ready":false}]
+[{"id":"rswld1","description":"RSUD Waled","webhook":"http://192.168.2.30/siramah/api/wa/webhooka","ready":true},{"id":"mrwlmc","description":"Marwan Test","webhook":"","ready":true},{"id":"testkuks","description":"Marwan Wa","webhook":"https://klinikkitasehat.com/api/wa/webhook","ready":true}]

@@ -200,12 +200,12 @@ const createSession = function (id, description, webhook) {
       }
     }
   });
-  let rejectCalls = true;
-  client.on('call', async (call) => {
-    console.log('Call received, rejecting. GOTO Line 261 to disable', call);
-    if (rejectCalls) await call.reject();
-    await client.sendMessage(call.from, `[${call.fromMe ? 'Outgoing' : 'Incoming'}] Phone call from ${call.from}, type ${call.isGroup ? 'group' : ''} ${call.isVideo ? 'video' : 'audio'} call. ${rejectCalls ? 'Nomor ini tidak menerima panggilan. Panggilan ini otomatis ditutup oleh sistem.' : ''}`);
-  });
+  // let rejectCalls = false;
+  // client.on('call', async (call) => {
+  //   console.log('Call received, rejecting. GOTO Line 261 to disable', call);
+  //   if (rejectCalls) await call.reject();
+  //   await client.sendMessage(call.from, `[${call.fromMe ? 'Outgoing' : 'Incoming'}] Phone call from ${call.from}, type ${call.isGroup ? 'group' : ''} ${call.isVideo ? 'video' : 'audio'} call. ${rejectCalls ? 'Nomor ini tidak menerima panggilan. Panggilan ini otomatis ditutup oleh sistem.' : ''}`);
+  // });
   client.on('disconnected', (reason) => {
     console.log(id + ' DISCONNECTED ' + reason);
     io.emit('message', { id: id, text: 'Whatsapp is disconnected!' });
