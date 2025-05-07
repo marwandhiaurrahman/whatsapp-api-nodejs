@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: true
 }));
-
 app.use(fileUpload({
   debug: false
 }));
@@ -243,13 +242,6 @@ const init = function (socket) {
   const savedSessions = getSessionsFile();
   if (savedSessions.length > 0) {
     if (socket) {
-      /**
-       * At the first time of running (e.g. restarting the server), our client is not ready yet!
-       * It will need several time to authenticating.
-       * 
-       * So to make people not confused for the 'ready' status
-       * We need to make it as FALSE for this condition
-       */
       savedSessions.forEach((e, i, arr) => {
         arr[i].ready = false;
       });
@@ -262,15 +254,28 @@ const init = function (socket) {
     }
   }
 }
-
 // Socket IO
 init();
 io.on('connection', function (socket) {
   init(socket);
-
   socket.on('create-session', function (data) {
     console.log('Create session: ' + data.id);
     createSession(data.id, data.description, data.webhook);
+  });
+
+  // Tambahkan handler untuk update webhook
+  socket.on('update-webhook', function (data) {
+    console.log('Update webhook for session: ' + data.id);
+    const savedSessions = getSessionsFile();
+    const sessionIndex = savedSessions.findIndex(sess => sess.id === data.id);
+
+    if (sessionIndex !== -1) {
+      savedSessions[sessionIndex].webhook = data.webhook;
+      setSessionsFile(savedSessions);
+      console.log(`Webhook updated for session ${data.id}`);
+    } else {
+      console.log(`Session ${data.id} not found!`);
+    }
   });
 });
 server.listen(port, function () {
@@ -282,7 +287,7 @@ app.get('/', (req, res) => {
     root: __dirname
   });
 });
-app.get('/swajsweb', (req, res) => {
+app.get('/session', (req, res) => {
   res.sendFile('index-multiple-account.html', {
     root: __dirname
   });
